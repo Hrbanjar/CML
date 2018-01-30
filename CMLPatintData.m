@@ -31,8 +31,13 @@ classdef CMLPatintData < handle
         
         %outcome
         sokalscore;
+        SokalOutput;
         hasfordscore;
+        HasfordOutput
         eutosscore;
+        EUTOSOutput;
+        ELTSscore;
+        ELTSOutput;
         TreeD;
         TreeE;
         TreeF;
@@ -52,7 +57,7 @@ classdef CMLPatintData < handle
                 obj.count=r(1,1)+1;
             end%if
             obj.PMData= csvread('Cat24.csv');
-            obj.PSData= csvread('PV.csv');
+            obj.PSData= csvread('TrainS.csv');
        
         %Prognostic factor
         obj.age=0;
@@ -94,12 +99,12 @@ classdef CMLPatintData < handle
             obj.Platelet=Platelet;
             obj.blastsPercentage=blastsPercentage;
             %Sokal Calculator
-            SokalOutput=exp((0.0116*(age-43.4))+0.0345*(spleensize-7.51)+0.188*((power((Platelet/700),2))-0.563)+0.0887*(blastsPercentage-2.1));
-            if SokalOutput<0.8
+            obj.SokalOutput=exp((0.0116*(age-43.4))+0.0345*(spleensize-7.51)+0.188*((power((Platelet/700),2))-0.563)+0.0887*(blastsPercentage-2.1));
+            if obj.SokalOutput<0.8
                 sokalscore=1;
-                elseif SokalOutput>0.8 && SokalOutput<1.2
+                elseif obj.SokalOutput>0.8 && obj.SokalOutput<1.2
                     sokalscore=1;
-                    elseif SokalOutput>1.2
+                    elseif obj.SokalOutput>1.2
                         sokalscore=0;
             end%endif
             
@@ -125,12 +130,12 @@ classdef CMLPatintData < handle
                 PlateletsScoreH=1;
             end
           %Hasford Calculator
-          HasfordOutput=((0.6666*AgeScoreH)+(0.042*spleensize)+(0.0584*blastsPercentage)+(0.0413*eosinophilsPercentage)+(0.2039*BasophilsScoreH)+(1.0956*PlateletsScoreH))*1000;
-          if HasfordOutput<780 || HasfordOutput==780
+          obj.HasfordOutput=((0.6666*AgeScoreH)+(0.042*spleensize)+(0.0584*blastsPercentage)+(0.0413*eosinophilsPercentage)+(0.2039*BasophilsScoreH)+(1.0956*PlateletsScoreH))*1000;
+          if obj.HasfordOutput<780 || obj.HasfordOutput==780
              hasfordscore=1;
-             elseif HasfordOutput>781 && HasfordOutput<1480
+             elseif obj.HasfordOutput>781 && obj.HasfordOutput<1480
                  hasfordscore=1;    
-                 elseif HasfordOutput>1481 || HasfordOutput==1481
+                 elseif obj.HasfordOutput>1481 || obj.HasfordOutput==1481
                      hasfordscore=0;
           end%endif
           obj.eosinophilsPercentage=eosinophilsPercentage;
@@ -139,23 +144,41 @@ classdef CMLPatintData < handle
         end%Hasford function
         function eutosscore = EUTOS(obj,basophilsPercentage,spleensize)
   % EUTOS Calculator
-            EUTOSOutput=(7*basophilsPercentage)+(4*spleensize);
-            if EUTOSOutput<87
+            obj.EUTOSOutput=(7*basophilsPercentage)+(4*spleensize);
+            if obj.EUTOSOutput<87
                 eutosscore=1;
-                    elseif EUTOSOutput>87 || EUTOSOutput==87
+                    elseif obj.EUTOSOutput>87 || obj.EUTOSOutput==87
                         eutosscore=0;
             end %endif
         obj.eutosscore=eutosscore;
         end%EUTOS function
+        function ELTSscore = ELTS(obj, age,spleensize,Platelet,blastsPercentage )
+  % ELTS Calculator
+            obj.ELTSOutput=(0.0025* (power((age/10),3)))+ (0.0615*spleensize)+ (0.1052*blastsPercentage)+ (0.4104*(power((Platelet/1000),-0.5)));
+            if obj.ELTSOutput<2.2185
+                ELTSscore=1;
+                    elseif obj.ELTSOutput>2.2185
+                        ELTSscore=0;
+            end %endif
+        obj.ELTSscore=ELTSscore;
+        end%EUTOS function
         function combinedprognostic = CombinedScore(obj)
             % Consisstancy Test
-           if  obj.sokalscore==1 && obj.hasfordscore==1 && obj.eutosscore==1
+           if  obj.sokalscore==1 && obj.hasfordscore==1 && obj.eutosscore==1 && obj.ELTSscore==1
                  combinedprognostic=1;
-               elseif obj.sokalscore==0 && obj.hasfordscore==0 && obj.eutosscore==0
+               elseif obj.sokalscore==0 && obj.hasfordscore==0 && obj.eutosscore==0 && obj.ELTSscore==0
                  combinedprognostic=0;
                      else
-                        obj.CB=fitcnb(obj.PSData(:,[2 6]),obj.PSData(:,7)); % Spleen Basophils MMR
-                        combinedprognostic=predict(obj.CB,[obj.spleensize obj.basophilsPercentage]);
+                        obj.CB=fitcsvm(...
+                        obj.PSData(:,[ 1 2 3 4]), ...
+                        obj.PSData(:,5), ...
+                        'KernelFunction', 'polynomial', ...
+                        'PolynomialOrder', 2, ...
+                        'KernelScale', 'auto', ...
+                        'BoxConstraint', 1, ...
+                        'Standardize', true, ...
+                        'ClassNames', [0; 1]);
+                        combinedprognostic=predict(obj.CB,[obj.SokalOutput  obj.HasfordOutput  obj.EUTOSOutput  obj.ELTSOutput]);
             end%endif
             obj.combinedprognostic=combinedprognostic;
         end%combinedscore function

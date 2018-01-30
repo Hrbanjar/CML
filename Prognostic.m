@@ -63,6 +63,7 @@ set(handles.ConflictResult,'String',' ');
 set(handles.sokalresult,'String',' ');
 set(handles.hasfordresult,'String',' ');
 set(handles.eutosresults,'String',' ');
+set(handles.eltsresults,'String',' ');
 set(handles.Recommendation,'String',' ');
 set(handles.editAge,'String','');
 set(handles.editSpleen,'String','');
@@ -314,17 +315,20 @@ else
     handles.sokalscore=handles.obj.Sokal(handles.age, handles.spleensize, handles.Platelet, handles.blastsPercentage);
     handles.hasfordscore=handles.obj.Hasford(handles.age,handles.spleensize,handles.Platelet,handles.blastsPercentage, handles.eosinophilsPercentage,handles.basophilsPercentage);
     handles.eutosscore=handles.obj.EUTOS(handles.basophilsPercentage,handles.spleensize);
+    handles.ELTSscore=handles.obj.ELTS(handles.age,handles.spleensize,handles.Platelet,handles.blastsPercentage);
     guidata(hObject, handles);
     %%%%%%%
-    if handles.sokalscore==1 && handles.hasfordscore==1 &&  handles.eutosscore==1
+    if handles.sokalscore==1 && handles.hasfordscore==1 &&  handles.eutosscore==1 && handles.ELTSscore==1
        set(handles.sokalresult,'String','Low-Risk ');
        set(handles.hasfordresult,'String','Low-Risk ');
        set(handles.eutosresults,'String','Low-Risk ');
+       set(handles.eltsresults,'String','Low-Risk ');
        set(handles.Recommendation,'String',strcat('Frontline imatinib is recommended, the patient may achieve MMR at 24 months, and the patient should not need more aggressive imatinib therapy.'));   
-    elseif handles.sokalscore==0 && handles.hasfordscore==0 &&  handles.eutosscore==0
+    elseif handles.sokalscore==0 && handles.hasfordscore==0 &&  handles.eutosscore==0 && handles.ELTSscore==0
        set(handles.sokalresult,'String','High-Risk ');       
        set(handles.hasfordresult,'String','High-Risk ');
        set(handles.eutosresults,'String','High-risk ');
+       set(handles.eltsresults,'String','High-risk ');
        set(handles.Recommendation,'String',strcat('Warning: frontline imatinib is not recommended, other TKIs are recommended, and the patient should need more aggressive imatinib therapy, or switch to nilotinib or dasatinib with close monitoring.'));
     else
         handles.combinedprognostic=handles.obj.CombinedScore();
@@ -350,6 +354,11 @@ else
        else
            set(handles.eutosresults,'String','High-Risk ');
          end
+          if handles.eltsresults==1 
+       set(handles.eltsresults,'String','Low-Risk ');
+       else
+           set(handles.eltsresults,'String','High-Risk ');
+         end
     end
        guidata(hObject,handles);   
 end
@@ -367,6 +376,7 @@ set(handles.ConflictResult,'String',' ');
 set(handles.sokalresult,'String',' ');
 set(handles.hasfordresult,'String',' ');
 set(handles.eutosresults,'String',' ');
+set(handles.eltsresults,'String',' ');
 set(handles.Recommendation,'String',' ');
 set(handles.editAge,'String','');
 set(handles.editSpleen,'String','');
