@@ -15,5 +15,5 @@ We recommend validating the use of the personalized medicine support system. The
 
 References
 1.	Banjar H, Ranasinghe D, Brown F, Adelson D, Kroger T, et al. (2017) Modelling Predictors of Molecular Response to Frontline Imatinib for Patients with Chronic Myeloid Leukaemia. PloS one 12: e0168947.
-2.	Banjar H, Hughes T, Brown F, Adelson D, White D, et al. (2017) Combined Value of Validated Prognostic Scores and Resolving Conflict in Allocation to Risk Groups in Chronic Myeloid Leukaemia Patients.Submitted to PeerJ on  22nd April 2018, Under Review.
+2.	Banjar H, Hughes T, Brown F, Adelson D, White D, et al. (2017) Combining validated prognostic scores and resolving conflict in the allocation to risk groups of Chronic Myeloid Leukemia patients.Submitted to PeerJ on  22nd April 2018, Under Review.
 
